@@ -74,6 +74,7 @@ class MyApp extends StatelessWidget {
                     return const SampleItemDetailsView();
                   case SampleItemAdd.routeName:
                     return SampleItemAdd();
+
                   case SampleItemListView.routeName:
                   default:
                     return SampleItemListView();
