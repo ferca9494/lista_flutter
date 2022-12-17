@@ -1,30 +1,31 @@
-# holamundo
+# Lista de compras
 
-A new Flutter project.
+¿Estás cansado de llevar la calculadora científica de tu abuela a tu supermercado de confianza? 
+probá esta App que te resume esos cálculos tediosos.
 
-## Getting Started
+# Descripcion
 
-This project is a starting point for a Flutter application that follows the
-[simple app state management
-tutorial](https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple).
+Proyecto en Flutter/Dart de un CRUD de items.
 
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Funcionalidad
 
-## Assets
+Agregar item
+---
+Pulsá el icono + para entrar a la pantalla de formulario de adiccion de item nuevo.
+Se deberá ingresar Nombre del item, cantidad, precio por unidad y una categoria de la lista.
+Al finalizar, pulsar el botón Agregar.
 
-The `assets` directory houses images, fonts, and any other files you want to
-include with your application.
+Modificar un item de la lista
+---
+Pulsa uno de los items de la lista para entrar a la pantalla de edicion del item.
+Se deberá ingresar Nombre del item, cantidad, precio por unidad y una categoria de la lista.
+Al finalizar, pulsar el botón Modificar.
 
-The `assets/images` directory contains [resolution-aware
-images](https://flutter.dev/docs/development/ui/assets-and-images#resolution-aware).
+Eliminar un item de la lista
+---
+Manten pulsado en el item que quieras eliminar y acontinuacion este será eliminado de la lista.
 
-## Localization
-
-This project generates localized messages based on arb files found in
-the `lib/src/localization` directory.
-
-To support additional languages, please visit the tutorial on
-[Internationalizing Flutter
-apps](https://flutter.dev/docs/development/accessibility-and-localization/internationalization)
+To Do's
+---
+- mostrar un dashboard con porcentajes de compras, graficos y registros de compras
+- mejorar estilización
