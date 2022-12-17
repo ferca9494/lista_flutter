@@ -1,9 +1,6 @@
-import 'dart:html';
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:holamundo/src/sample_feature/sample_item_list_view.dart';
+
 import 'sample_item.dart';
 import 'category.dart';
 
@@ -15,7 +12,7 @@ class SampleItemMod extends StatefulWidget {
 
   @override
   _SampleItemMod createState() => _SampleItemMod();
-  static const routeName = '/add_sample_item';
+  static const routeName = '/mod_sample_item';
 }
 
 /// Displays detailed information about a SampleItem.
@@ -26,23 +23,30 @@ class _SampleItemMod extends State<SampleItemMod> {
   TextEditingController valor_cantidad = TextEditingController();
   TextEditingController valor_precio = TextEditingController();
 
-  int _selectedCate = 0;
+  int id_item = 0;
+  int id_categoria = 0;
   List<Category> categorias = [
-    Category(1, "Comida", Color.fromARGB(255, 248, 132, 0)),
-    Category(2, "Limpieza", Color.fromARGB(255, 0, 219, 248)),
-    Category(3, "Hogar", Color.fromARGB(255, 58, 248, 0)),
-    Category(4, "Higiene", Color.fromARGB(255, 207, 0, 248)),
-    Category(5, "Otros", Color.fromARGB(255, 100, 100, 100)),
+    Category(0, "Comida", Color.fromARGB(255, 248, 132, 0),
+        const Icon(Icons.bakery_dining)),
+    Category(1, "Electronica", Color.fromARGB(255, 244, 248, 0),
+        const Icon(Icons.computer)),
+    Category(2, "Limpieza", Color.fromARGB(255, 0, 219, 248),
+        const Icon(Icons.cleaning_services)),
+    Category(3, "Hogar", Color.fromARGB(255, 58, 248, 0),
+        const Icon(Icons.maps_home_work)),
+    Category(4, "Personal", Color.fromARGB(255, 207, 0, 248),
+        const Icon(Icons.tag_faces)),
+    Category(5, "Otros", Color.fromARGB(255, 100, 100, 100),
+        const Icon(Icons.category)),
   ];
-  //String? valor_nombre = "";
-  //String? valor_cantidad = "";
-  //String? valor_precio = "";
 
   void initState() {
     SampleItem item = widget.item;
     valor_nombre = TextEditingController(text: item.nombre);
     valor_cantidad = TextEditingController(text: item.cantidad.toString());
     valor_precio = TextEditingController(text: item.precio.toString());
+    id_item = item.id;
+    id_categoria = item.categoria.id;
     super.initState();
   }
 
@@ -70,7 +74,7 @@ class _SampleItemMod extends State<SampleItemMod> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Item'),
+        title: const Text('Modificar Item'),
       ),
       body: Padding(
           padding: const EdgeInsets.all(16.9),
@@ -132,7 +136,7 @@ class _SampleItemMod extends State<SampleItemMod> {
                           // This is called when selected item is changed.
                           onSelectedItemChanged: (int selectedItem) {
                             setState(() {
-                              _selectedCate = selectedItem;
+                              id_categoria = selectedItem;
                             });
                           },
                           children: List<Widget>.generate(categorias.length,
@@ -167,10 +171,10 @@ class _SampleItemMod extends State<SampleItemMod> {
                               valor_nombre.text,
                               int.parse(valor_cantidad.text),
                               double.parse(valor_precio.text),
-                              categorias[_selectedCate]));
+                              categorias[id_categoria]));
                     });
                   },
-                  child: const Text("Agregar"))
+                  child: const Text("Modificar"))
             ]),
           )),
     );

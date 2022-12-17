@@ -1,9 +1,6 @@
-import 'dart:html';
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:holamundo/src/sample_feature/sample_item_list_view.dart';
+
 import 'sample_item.dart';
 import 'category.dart';
 
@@ -25,15 +22,19 @@ class _SampleItemAdd extends State<SampleItemAdd> {
 
   int _selectedCate = 0;
   List<Category> categorias = [
-    Category(1, "Comida", Color.fromARGB(255, 248, 132, 0)),
-    Category(2, "Limpieza", Color.fromARGB(255, 0, 219, 248)),
-    Category(3, "Hogar", Color.fromARGB(255, 58, 248, 0)),
-    Category(4, "Higiene", Color.fromARGB(255, 207, 0, 248)),
-    Category(5, "Otros", Color.fromARGB(255, 100, 100, 100)),
+    Category(0, "Comida", Color.fromARGB(255, 248, 132, 0),
+        const Icon(Icons.bakery_dining)),
+    Category(1, "Electronica", Color.fromARGB(255, 244, 248, 0),
+        const Icon(Icons.computer)),
+    Category(2, "Limpieza", Color.fromARGB(255, 0, 219, 248),
+        const Icon(Icons.cleaning_services)),
+    Category(3, "Hogar", Color.fromARGB(255, 58, 248, 0),
+        const Icon(Icons.maps_home_work)),
+    Category(4, "Personal", Color.fromARGB(255, 207, 0, 248),
+        const Icon(Icons.tag_faces)),
+    Category(5, "Otros", Color.fromARGB(255, 100, 100, 100),
+        const Icon(Icons.category)),
   ];
-  //String? valor_nombre = "";
-  //String? valor_cantidad = "";
-  //String? valor_precio = "";
 
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
@@ -134,7 +135,8 @@ class _SampleItemAdd extends State<SampleItemAdd> {
                           }),
                         ),
                       ),
-                  child: const Text("Selecciona categoria")),
+                  child:
+                      Text("Categoria: ${categorias[_selectedCate].nombre}")),
               const SizedBox(height: 32),
               ElevatedButton(
                   onPressed: () {

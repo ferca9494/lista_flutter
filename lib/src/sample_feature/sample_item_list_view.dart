@@ -1,13 +1,10 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
-import 'package:holamundo/src/sample_feature/sample_item_add.dart';
-import 'package:holamundo/src/sample_feature/sample_item_mod.dart';
 
 import '../settings/settings_view.dart';
+
+import 'sample_item_add.dart';
+import 'sample_item_mod.dart';
 import 'sample_item.dart';
-import 'sample_item_details_view.dart';
-//import 'sample_item_add.dart';
 import 'category.dart';
 
 /// Displays a list of SampleItems.
@@ -18,16 +15,39 @@ class SampleItemListView extends StatefulWidget {
 }
 
 class _SampleItemListView extends State<SampleItemListView> {
+  List<SampleItem> items = [];
+  /*
   List<SampleItem> items = [
-    SampleItem(1, "manzanas", 6, 15.0,
-        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0))),
-    SampleItem(2, "bananas", 2, 22.0,
-        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0))),
-    SampleItem(3, "naranjas", 4, 30.0,
-        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0))),
-    SampleItem(4, "pomelos", 7, 25.0,
-        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0)))
+    SampleItem(
+        1,
+        "manzanas",
+        6,
+        15.0,
+        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0),
+            const Icon(Icons.tag_faces))),
+    SampleItem(
+        2,
+        "bananas",
+        2,
+        22.0,
+        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0),
+            const Icon(Icons.tag_faces))),
+    SampleItem(
+        3,
+        "naranjas",
+        4,
+        30.0,
+        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0),
+            const Icon(Icons.tag_faces))),
+    SampleItem(
+        4,
+        "pomelos",
+        7,
+        25.0,
+        Category(1, "Comida", Color.fromARGB(255, 248, 132, 0),
+            const Icon(Icons.tag_faces)))
   ];
+*/
 
   @override
   Widget build(BuildContext context) {
@@ -75,11 +95,7 @@ class _SampleItemListView extends State<SampleItemListView> {
               subtitle: Text("${item.cantidad}u. \$${item.precio}"),
               leading: CircleAvatar(
                 // Display the Flutter Logo image asset.
-                child: Text(
-                  item.categoria.nombre.substring(0, 1),
-                  style: TextStyle(
-                      color: Color.fromARGB(255, 255, 255, 255), fontSize: 24),
-                ),
+                child: item.categoria.icon,
                 backgroundColor: item.categoria.color,
 
                 //foregroundImage: AssetImage('assets/images/flutter_logo.png'),
