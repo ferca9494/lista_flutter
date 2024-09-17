@@ -258,7 +258,9 @@ class _ProductListScreen extends State<ProductListScreen> {
               MaterialPageRoute(
                   builder: (_) => ProductFormScreen(
                       settings: widget.settings,
-                      lastIndex: user.products.last.id))).then((newItem) {
+                      lastIndex: user.products.isNotEmpty
+                          ? user.products.last.id
+                          : null))).then((newItem) {
             if (newItem != null) {
               setState(() {});
             }

@@ -96,8 +96,10 @@ class _ProductFormScreen extends State<ProductFormScreen> {
             categorias[_selectedCate],
             necesidad);
       } else {
+        var id = widget.lastIndex != null ? widget.lastIndex! + 1 : 1;
+
         newProduct = Product(
-            widget.lastIndex! + 1,
+            id,
             nombreController.text,
             int.parse(cantidadController.text),
             double.parse(precioController.text),
