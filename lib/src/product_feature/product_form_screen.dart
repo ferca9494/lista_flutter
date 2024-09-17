@@ -1,18 +1,17 @@
 // ignore_for_file: avoid_print, prefer_interpolation_to_compose_strings
 
-import 'dart:ffi';
-
 import 'package:carrito/src/animations_screens/add_cart_anim.dart';
-import 'package:carrito/src/settings/settings_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:carrito/src/model/category.dart';
+import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:carrito/src/styles/buttons.dart';
 import 'package:carrito/src/styles/styles.dart';
+import 'package:flutter/material.dart';
+
 //import 'package:flutter/cupertino.dart';
 
 import '../data/categorys.dart';
-import '../model/product.dart';
 import '../data/user.dart' as user;
+import '../model/product.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final int? lastIndex;

@@ -1,15 +1,14 @@
+import 'package:carrito/src/data/categorys.dart';
+import 'package:carrito/src/model/category.dart';
 import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:carrito/src/data/categorys.dart';
-import 'package:carrito/src/model/category.dart';
-import 'package:carrito/src/styles/buttons.dart';
 
+import '../data/user.dart' as user;
 import '../model/product.dart';
 import '../settings/settings_view.dart';
 import '../styles/styles.dart';
 import 'product_form_screen.dart';
-import '../data/user.dart' as user;
 
 // ignore: use_key_in_widget_constructors
 class ProductListScreen extends StatefulWidget {
