@@ -1,16 +1,31 @@
-# carrito
+# Lista de compras
 
-A new Flutter project.
+¿Estás cansado de llevar la calculadora científica de tu abuela a tu supermercado de confianza? 
+probá esta App que te resume esos cálculos tediosos.
 
-## Getting Started
+# Descripcion
 
-This project is a starting point for a Flutter application.
+Proyecto en Flutter/Dart de un CRUD de items.
 
-A few resources to get you started if this is your first Flutter project:
+# Funcionalidad
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Agregar item
+---
+Pulsá el icono + para entrar a la pantalla de formulario de adiccion de item nuevo.
+Se deberá ingresar Nombre del item, cantidad, precio por unidad y una categoria de la lista.
+Al finalizar, pulsar el botón Agregar.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Modificar un item de la lista
+---
+Pulsa uno de los items de la lista para entrar a la pantalla de edicion del item.
+Se deberá ingresar Nombre del item, cantidad, precio por unidad y una categoria de la lista.
+Al finalizar, pulsar el botón Modificar.
+
+Eliminar un item de la lista
+---
+Manten pulsado en el item que quieras eliminar y acontinuacion este será eliminado de la lista.
+
+To Do's
+---
+- mostrar un dashboard con porcentajes de compras, graficos y registros de compras
+- mejorar estilización
