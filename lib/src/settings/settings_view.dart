@@ -62,6 +62,8 @@ class SettingsView extends StatelessWidget {
               Text("Activar/Desactivar animaciones")
             ]),
           ),
+          const SizedBox(height: 32),
+          Text("Creador: Fernando Cañete (ferca949@gmail.com)")
         ]));
   }
 }
