@@ -7,8 +7,6 @@ import 'package:carrito/src/styles/buttons.dart';
 import 'package:carrito/src/styles/styles.dart';
 import 'package:flutter/material.dart';
 
-//import 'package:flutter/cupertino.dart';
-
 import '../data/categorys.dart';
 import '../data/user.dart' as user;
 import '../model/product.dart';
@@ -27,11 +25,11 @@ class ProductFormScreen extends StatefulWidget {
 class _ProductFormScreen extends State<ProductFormScreen> {
   //static const routeName = '/add_sample_item';
 
-  TextEditingController nombreController = TextEditingController(
-      text: "Producto " + (user.products.length + 1).toString());
+  TextEditingController nombreController = TextEditingController();
   TextEditingController cantidadController = TextEditingController(text: "1");
   TextEditingController precioController = TextEditingController();
 
+  String namePlaceholder = "Producto " + (user.products.length + 1).toString();
   int _selectedCate = 0;
 
   int id_item = 0;
@@ -50,27 +48,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
     id_categoria = item.categoria.id;
     necesidad = item.necesidad;
   }
-/*
-  void _showDialog(Widget child) {
-    showCupertinoModalPopup<void>(
-        context: context,
-        builder: (BuildContext context) => Container(
-              height: 216,
-              padding: const EdgeInsets.only(top: 6.0),
-              // The Bottom margin is provided to align the popup above the system navigation bar.
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              // Provide a background color for the popup.
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              // Use a SafeArea widget to avoid system overlaps.
-              child: SafeArea(
-                top: false,
-                child: child,
-              ),
-            ));
-  }
-*/
 
   save() {
     if (precioController.text.isEmpty) {
@@ -96,10 +73,13 @@ class _ProductFormScreen extends State<ProductFormScreen> {
             necesidad);
       } else {
         var id = widget.lastIndex != null ? widget.lastIndex! + 1 : 1;
+        String name = nombreController.text == ""
+            ? namePlaceholder
+            : nombreController.text;
 
         newProduct = Product(
             id,
-            nombreController.text,
+            name,
             int.parse(cantidadController.text),
             double.parse(precioController.text),
             categorias[_selectedCate],
@@ -133,31 +113,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Agregar Item'),
-        /*
-            //?TESTING animations
-        actions: [
-
-          IconButton(
-            icon: const Icon(Icons.abc),
-         
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => addcart_animscreen(
-                        item: CircleAvatar(
-                          backgroundColor: categorias[_selectedCate].color,
-                          child: categorias[_selectedCate].icon,
-                        ),
-                        onFinish: () {
-                          return 1;
-                        })),
-              );
-            },
-          
-          ),
-        ],
-          */
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -167,31 +122,16 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                 const SizedBox(height: 32),
                 TextFormField(
                   controller: nombreController,
-                  //onSaved: (newValue) => {this.valor_nombre = newValue},
-                  decoration: const InputDecoration(
-                    labelText: "Nombre",
-                    fillColor: Colors.white,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 2.0),
-                    ),
-                  ),
+                  decoration: inputDeco(namePlaceholder, ""),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Row(children: [
                   Expanded(
                       flex: 4,
                       child: TextFormField(
                         controller: cantidadController,
-                        //onSaved: (newValue) => {this.valor_cantidad = newValue},
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: "Cantidad",
-                          fillColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.white, width: 2.0),
-                          ),
-                        ),
+                        decoration: inputDeco("Cantidad", "1"),
                       )),
                   Expanded(
                       flex: 1,
@@ -220,28 +160,16 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                         ),
                       ]))
                 ]),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 TextFormField(
                   autofocus: true,
                   controller: precioController,
-                  /*onSaved: (newValue) => {
-                  setState(() {
-                    this.valor_precio = newValue;
-                    print(valor_precio.toString());
-                  })
-                },*/
                   onChanged: (a) => setState(() {}),
                   onEditingComplete: save,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: "Precio (\$)",
-                    fillColor: Colors.white,
-                    focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.white, width: 2.0)),
-                  ),
+                  decoration: inputDeco("Precio (\$)", "\$1"),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Text(
                   "Categoria: " + categorias[_selectedCate].nombre,
                 ),
@@ -266,33 +194,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                                   ))))
                   ],
                 ),
-                /*
-              ElevatedButton(
-                  onPressed: () => _showDialog(
-                        CupertinoPicker(
-                          magnification: 1.22,
-                          squeeze: 1.2,
-                          useMagnifier: true,
-                          itemExtent: _kItemExtent,
-                          // This is called when selected item is changed.
-                          onSelectedItemChanged: (int selectedItem) {
-                            setState(() {
-                              _selectedCate = selectedItem;
-                            });
-                          },
-                          children: List<Widget>.generate(categorias.length,
-                              (int index) {
-                            return Center(
-                              child: Text(
-                                categorias[index].nombre,
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                  child:
-                      Text("Categoria: ${categorias[_selectedCate].nombre}")),
-                      */
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -317,13 +218,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                         child: const Text("Quiero!")),
                   ],
                 ),
-                /*
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                      onPressed: save,
-                      style: btn(Colors.blue),
-                      child: const Text("Agregar")),
-                */
               ]),
             )),
       ),
@@ -338,3 +232,14 @@ class _ProductFormScreen extends State<ProductFormScreen> {
     );
   }
 }
+
+inputDeco(name, hint) => InputDecoration(
+      hintText: hint,
+      labelText: name,
+      fillColor: Colors.white,
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: const Color.fromARGB(255, 162, 162, 162),
+        ),
+      ),
+    );

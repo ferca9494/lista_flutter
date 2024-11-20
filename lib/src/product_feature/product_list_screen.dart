@@ -77,7 +77,7 @@ class _ProductListScreen extends State<ProductListScreen> {
     return price.formatNumber();
   }
 
-  Widget buildTotalSection(double total, int cant) {
+  Widget buildTotalSection(double total) {
     return Container(
       padding: const EdgeInsets.all(15),
       child: Row(
@@ -94,12 +94,11 @@ class _ProductListScreen extends State<ProductListScreen> {
                   });
                 },
               ),
-              Text("Total (${cant.toString()})",
-                  style: TextStyle(fontSize: 24)),
+              Text("Total", style: TextStyle(fontSize: 24)),
             ],
           ),
           Text(
-            "\$${total.toString()}",
+            "\$${total.toStringAsFixed(2)}",
             style: TextStyle(fontSize: 28, color: priceColor),
           ),
         ],
@@ -107,23 +106,43 @@ class _ProductListScreen extends State<ProductListScreen> {
     );
   }
 
-  Widget buildGraphSection() {
-    return Container(
-      width: 300,
-      height: 180,
-      padding: const EdgeInsets.all(15),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 10,
-            child: PieChart(
-              PieChartData(
-                sections: [
-                  if (GraphSelected == 0)
-                    for (Categoryy cat in categorias) ...[
+  Widget buildGraphSection(int cantU, int cantP) {
+    return Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Text("Cant Unidades: " + cantU.toString()),
+        Text("Cant. Productos: " + cantP.toString())
+      ]),
+      Container(
+        width: 300,
+        height: 180,
+        padding: const EdgeInsets.all(15),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 10,
+              child: PieChart(
+                PieChartData(
+                  sections: [
+                    if (GraphSelected == 0)
+                      for (Categoryy cat in categorias) ...[
+                        PieChartSectionData(
+                          value: totalPriceCategory(cat.nombre),
+                          color: cat.color,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(color: Colors.black, offset: Offset(1, 1)),
+                            ],
+                          ),
+                          title:
+                              "${cat.nombre}\n(${CantSelected ? totalPriceCategory(cat.nombre).toString() : "\$" + totalPriceCategory(cat.nombre).toStringAsFixed(2)})",
+                        ),
+                      ],
+                    if (GraphSelected == 1) ...[
                       PieChartSectionData(
-                        value: totalPriceCategory(cat.nombre),
-                        color: cat.color,
+                        value: totalPriceNeed(true),
+                        color: needColor,
                         titleStyle: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -132,85 +151,72 @@ class _ProductListScreen extends State<ProductListScreen> {
                           ],
                         ),
                         title:
-                            "${cat.nombre}\n(${CantSelected ? totalPriceCategory(cat.nombre).toString() : "\$" + totalPriceCategory(cat.nombre).toString()})",
+                            "Necesito\n(${CantSelected ? totalPriceNeed(true).toString() : "\$" + totalPriceNeed(true).toStringAsFixed(2)})",
                       ),
-                    ],
-                  if (GraphSelected == 1) ...[
-                    PieChartSectionData(
-                      value: totalPriceNeed(true),
-                      color: needColor,
-                      titleStyle: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(color: Colors.black, offset: Offset(1, 1)),
-                        ],
+                      PieChartSectionData(
+                        value: totalPriceNeed(false),
+                        color: wantColor,
+                        titleStyle: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                          ],
+                        ),
+                        title:
+                            "Quiero\n(${CantSelected ? totalPriceNeed(false).toString() : "\$" + totalPriceNeed(false).toStringAsFixed(2)})",
                       ),
-                      title:
-                          "Necesito\n(${CantSelected ? totalPriceNeed(true).toString() : "\$" + totalPriceNeed(true).toString()})",
-                    ),
-                    PieChartSectionData(
-                      value: totalPriceNeed(false),
-                      color: wantColor,
-                      titleStyle: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(color: Colors.black, offset: Offset(1, 1)),
-                        ],
-                      ),
-                      title:
-                          "Quiero\n(${CantSelected ? totalPriceNeed(false).toString() : "\$" + totalPriceNeed(false).toString()})",
-                    ),
-                  ]
+                    ]
+                  ],
+                ),
+                swapAnimationDuration: const Duration(milliseconds: 150),
+                swapAnimationCurve: Curves.linear,
+              ),
+            ),
+            const SizedBox(
+              width: 50,
+            ),
+            Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+                  IconButton(
+                    icon: Icon(CantSelected
+                        ? Icons.change_circle_sharp
+                        : Icons.currency_exchange_sharp),
+                    onPressed: () {
+                      setState(() {
+                        CantSelected = !CantSelected;
+                      });
+                      print(
+                          "category graph selected:" + CantSelected.toString());
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.category),
+                    onPressed: () {
+                      setState(() {
+                        GraphSelected = 0;
+                      });
+                      print("category graph selected");
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.back_hand),
+                    onPressed: () {
+                      setState(() {
+                        GraphSelected = 1;
+                      });
+                      print("needed graph selected");
+                    },
+                  ),
                 ],
               ),
-              swapAnimationDuration: const Duration(milliseconds: 150),
-              swapAnimationCurve: Curves.linear,
-            ),
-          ),
-          const SizedBox(
-            width: 50,
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                IconButton(
-                  icon: Icon(CantSelected
-                      ? Icons.change_circle_sharp
-                      : Icons.currency_exchange_sharp),
-                  onPressed: () {
-                    setState(() {
-                      CantSelected = !CantSelected;
-                    });
-                    print("category graph selected:" + CantSelected.toString());
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.category),
-                  onPressed: () {
-                    setState(() {
-                      GraphSelected = 0;
-                    });
-                    print("category graph selected");
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.back_hand),
-                  onPressed: () {
-                    setState(() {
-                      GraphSelected = 1;
-                    });
-                    print("needed graph selected");
-                  },
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
+            )
+          ],
+        ),
+      )
+    ]);
   }
 
   Widget buildListItem(BuildContext context, int index) {
@@ -219,7 +225,7 @@ class _ProductListScreen extends State<ProductListScreen> {
 
     return ListTile(
       title: Text(item.nombre),
-      subtitle: Text("${item.cantidad}u. \$${item.precio}"),
+      subtitle: Text("${item.cantidad}u. \$${item.precio.toStringAsFixed(2)}"),
       leading: CircleAvatar(
         backgroundColor: item.categoria.color,
         child: item.categoria.icon,
@@ -239,7 +245,7 @@ class _ProductListScreen extends State<ProductListScreen> {
         });
       },
       trailing: Text(
-        "\$$unitTotal",
+        "\$${unitTotal.toStringAsFixed(2)}",
         style: TextStyle(color: priceColor, fontSize: 24),
       ),
       onLongPress: () {
@@ -274,11 +280,11 @@ class _ProductListScreen extends State<ProductListScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              buildTotalSection(total, cant),
-              if (showGraph) buildGraphSection(),
+              buildTotalSection(total),
+              if (showGraph) buildGraphSection(cant, user.products.length),
               SizedBox(
                 height: showGraph
-                    ? MediaQuery.of(context).size.height - 200
+                    ? MediaQuery.of(context).size.height - 430
                     : MediaQuery.of(context).size.height,
                 child: ListView.separated(
                   shrinkWrap: true,
