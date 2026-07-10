@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'settings_controller.dart';
+import '../data/user.dart' as user;
 
 /// Displays the various settings that can be customized by the user.
 ///
 /// When a user changes a setting, the SettingsController is updated and
 /// Widgets that listen to the SettingsController are rebuilt.
+///
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key, required this.controller});
 
@@ -59,11 +61,22 @@ class SettingsView extends StatelessWidget {
                     controller
                         .updateAnimations(value ?? controller.activeAnimations);
                   }),
-              Text("Activar/Desactivar animaciones")
+              const Text("Activar/Desactivar animaciones")
             ]),
           ),
           const SizedBox(height: 32),
-          Text("Creador: Fernando Cañete (ferca949@gmail.com)")
+          TextButton(
+              onPressed: () {
+                user.products = [];
+              },
+              child: const Text("Borrar lista de compra actual")),
+          TextButton(
+              onPressed: () {
+                user.historyShop = [];
+              },
+              child: const Text("Borrar datos del historial de compras")),
+          const SizedBox(height: 32),
+          const Text("Creador: Fernando Cañete (ferca949@gmail.com)")
         ]));
   }
 }

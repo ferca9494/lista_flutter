@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 
 class addcart_animscreen extends StatefulWidget {
-  const addcart_animscreen({required this.item, required this.onFinish});
+  const addcart_animscreen({super.key, required this.item, required this.onFinish});
 
   final Widget item;
   final Function() onFinish;
@@ -18,7 +18,7 @@ class _addcart_animscreenState extends State<addcart_animscreen> {
         backgroundColor: Colors.white,
         body: Center(
           child: Center(
-              child: Stack(alignment: AlignmentDirectional(0, -1), children: [
+              child: Stack(alignment: const AlignmentDirectional(0, -1), children: [
             Dance(
                 //     from: 200,
                 curve: Curves.bounceInOut,

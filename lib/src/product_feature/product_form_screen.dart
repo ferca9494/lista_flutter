@@ -15,7 +15,7 @@ class ProductFormScreen extends StatefulWidget {
   final int? lastIndex;
   final Product? item;
   final SettingsController settings;
-  const ProductFormScreen({this.item, this.lastIndex, required this.settings});
+  const ProductFormScreen({super.key, this.item, this.lastIndex, required this.settings});
   @override
   _ProductFormScreen createState() => _ProductFormScreen();
   static const routeName = '/add_sample_item';
@@ -86,10 +86,11 @@ class _ProductFormScreen extends State<ProductFormScreen> {
             necesidad);
         user.products.add(newProduct);
       }
-      if (widget.settings.activeAnimations)
+      if (widget.settings.activeAnimations) {
         add_cart_animation(newProduct);
-      else
+      } else {
         Navigator.pop(context, newProduct);
+      }
     });
   }
 
@@ -225,9 +226,9 @@ class _ProductFormScreen extends State<ProductFormScreen> {
         onPressed: save,
         //precioController.text.isEmpty ? save : null,
         tooltip: 'Agregar item',
-        child: const Icon(Icons.check),
         backgroundColor:
             precioController.text.isEmpty ? Colors.grey : Colors.greenAccent,
+        child: const Icon(Icons.check),
       ),
     );
   }
@@ -237,9 +238,9 @@ inputDeco(name, hint) => InputDecoration(
       hintText: hint,
       labelText: name,
       fillColor: Colors.white,
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(
-          color: const Color.fromARGB(255, 162, 162, 162),
+      focusedBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color.fromARGB(255, 162, 162, 162),
         ),
       ),
     );

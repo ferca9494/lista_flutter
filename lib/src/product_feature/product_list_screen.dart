@@ -1,5 +1,8 @@
 import 'package:carrito/src/data/categorys.dart';
+import 'package:carrito/src/history_shop/historyshop_list_screen.dart';
 import 'package:carrito/src/model/category.dart';
+import 'package:carrito/src/model/market.dart';
+import 'package:carrito/src/model/shop.dart';
 import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +16,7 @@ import 'product_form_screen.dart';
 // ignore: use_key_in_widget_constructors
 class ProductListScreen extends StatefulWidget {
   final SettingsController settings;
-  const ProductListScreen({required this.settings});
+  const ProductListScreen({super.key, required this.settings});
 
   static const routeName = '/';
   @override
@@ -31,10 +34,11 @@ class _ProductListScreen extends State<ProductListScreen> {
 
     for (Product item in user.products) {
       if (item.categoria.nombre == categoria) {
-        if (CantSelected)
+        if (CantSelected) {
           totalCant += item.cantidad;
-        else
+        } else {
           total += item.cantidad * item.precio;
+        }
       }
     }
     return CantSelected ? totalCant : total;
@@ -44,10 +48,11 @@ class _ProductListScreen extends State<ProductListScreen> {
     double total = 0;
     for (Product item in user.products) {
       if (item.necesidad == necesidad) {
-        if (CantSelected)
+        if (CantSelected) {
           total += item.cantidad;
-        else
+        } else {
           total += item.cantidad * item.precio;
+        }
       }
     }
     return total;
@@ -94,7 +99,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                   });
                 },
               ),
-              Text("Total", style: TextStyle(fontSize: 24)),
+              const Text("Total", style: TextStyle(fontSize: 24)),
             ],
           ),
           Text(
@@ -109,8 +114,8 @@ class _ProductListScreen extends State<ProductListScreen> {
   Widget buildGraphSection(int cantU, int cantP) {
     return Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        Text("Cant Unidades: " + cantU.toString()),
-        Text("Cant. Productos: " + cantP.toString())
+        Text("Cant Unidades: $cantU"),
+        Text("Cant. Productos: $cantP")
       ]),
       Container(
         width: 300,
@@ -136,7 +141,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                             ],
                           ),
                           title:
-                              "${cat.nombre}\n(${CantSelected ? totalPriceCategory(cat.nombre).toString() : "\$" + totalPriceCategory(cat.nombre).toStringAsFixed(2)})",
+                              "${cat.nombre}\n(${CantSelected ? totalPriceCategory(cat.nombre).toString() : "\$${totalPriceCategory(cat.nombre).toStringAsFixed(2)}"})",
                         ),
                       ],
                     if (GraphSelected == 1) ...[
@@ -151,7 +156,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                           ],
                         ),
                         title:
-                            "Necesito\n(${CantSelected ? totalPriceNeed(true).toString() : "\$" + totalPriceNeed(true).toStringAsFixed(2)})",
+                            "Necesito\n(${CantSelected ? totalPriceNeed(true).toString() : "\$${totalPriceNeed(true).toStringAsFixed(2)}"})",
                       ),
                       PieChartSectionData(
                         value: totalPriceNeed(false),
@@ -164,7 +169,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                           ],
                         ),
                         title:
-                            "Quiero\n(${CantSelected ? totalPriceNeed(false).toString() : "\$" + totalPriceNeed(false).toStringAsFixed(2)})",
+                            "Quiero\n(${CantSelected ? totalPriceNeed(false).toString() : "\$${totalPriceNeed(false).toStringAsFixed(2)}"})",
                       ),
                     ]
                   ],
@@ -189,7 +194,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                         CantSelected = !CantSelected;
                       });
                       print(
-                          "category graph selected:" + CantSelected.toString());
+                          "category graph selected:$CantSelected");
                     },
                   ),
                   IconButton(
@@ -257,10 +262,14 @@ class _ProductListScreen extends State<ProductListScreen> {
     );
   }
 
+  double calcularTotalProductos() {
+    return user.products
+        .fold(0, (sum, item) => sum + (item.cantidad * item.precio));
+  }
+
   @override
   Widget build(BuildContext context) {
-    double total = user.products
-        .fold(0, (sum, item) => sum + (item.cantidad * item.precio));
+    double total = calcularTotalProductos();
     int cant = user.products.fold(0, (sum, item) => sum + (item.cantidad));
     // String totalStr = total.toString(); // formatPrice(total);
 
@@ -268,6 +277,29 @@ class _ProductListScreen extends State<ProductListScreen> {
       appBar: AppBar(
         title: const Text('Lista de la compra.'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.check_outlined),
+            onPressed: user.products.isNotEmpty
+                ? () {
+                    setState(() {
+                      user.historyShop.add(Shop(1, Market(1, "Dia"),
+                          DateTime.now(), user.products, total));
+
+                      user.products = [];
+
+                      print(">>added in history");
+                    });
+                  }
+                : null,
+          ),
+          if (user.historyShop.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const HistoryShopScreen()));
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 ButtonStyle btn({Color color = Colors.blue, bool selected = false}) =>
     ButtonStyle(
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
         ),
       ),
-      backgroundColor: MaterialStateProperty.all<Color>(color),
+      backgroundColor: WidgetStateProperty.all<Color>(color),
       side: selected
-          ? MaterialStateProperty.all<BorderSide>(
-              BorderSide(color: Colors.black, width: 2),
+          ? WidgetStateProperty.all<BorderSide>(
+              const BorderSide(color: Colors.black, width: 2),
             )
           : null,
     );
