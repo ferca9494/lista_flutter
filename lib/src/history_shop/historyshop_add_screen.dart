@@ -1,33 +1,28 @@
 import 'package:flutter/material.dart';
-import '../data/user.dart' as user;
+import 'package:provider/provider.dart';
+import '../data/cart_provider.dart';
 import '../model/market.dart';
 import '../model/shop.dart';
 import '../styles/styles.dart';
 
-class HistoryShopScreen extends StatefulWidget {
-  const HistoryShopScreen({super.key});
+class HistoryShopAddScreen extends StatefulWidget {
+  const HistoryShopAddScreen({super.key});
 
   @override
-  _HistoryShopScreen createState() => _HistoryShopScreen();
+  _HistoryShopAddScreen createState() => _HistoryShopAddScreen();
 }
 
-class _HistoryShopScreen extends State<HistoryShopScreen> {
+class _HistoryShopAddScreen extends State<HistoryShopAddScreen> {
   static const routeName = '/history_add';
 
   final TextEditingController nombremarketController = TextEditingController();
 
   save() {
-    double total = user.products
-        .fold(0, (sum, item) => sum + (item.cantidad * item.precio));
+    final cart = context.read<CartProvider>();
+    double total = cart.totalProducts;
 
-    setState(() {
-      user.historyShop.add(Shop(1, Market(1, nombremarketController.text),
-          DateTime.now(), user.products, total));
-
-      user.products = [];
-
-      print(">>added in history");
-    });
+    cart.addToHistory(Shop(1, Market(1, nombremarketController.text),
+        DateTime.now(), cart.products, total));
 
     Navigator.pop(context);
   }

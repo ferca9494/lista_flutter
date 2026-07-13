@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/user.dart' as user;
+import 'package:provider/provider.dart';
+import '../data/cart_provider.dart';
 import '../model/shop.dart';
 import '../styles/styles.dart';
 
@@ -13,8 +14,8 @@ class HistoryShopScreen extends StatefulWidget {
 class _HistoryShopScreen extends State<HistoryShopScreen> {
   static const routeName = '/history';
 
-  Widget buildListItem(BuildContext context, int index) {
-    Shop item = user.historyShop[index];
+  Widget buildListItem(BuildContext context, CartProvider cart, int index) {
+    Shop item = cart.historyShop[index];
     return ListTile(
       title: Text(item.market.name),
       subtitle: Text("${item.date}"),
@@ -26,17 +27,13 @@ class _HistoryShopScreen extends State<HistoryShopScreen> {
         "\$${item.totalPrice.toStringAsFixed(2)}",
         style: TextStyle(color: priceColor, fontSize: 24),
       ),
-      onLongPress: () {
-        setState(() {
-          //user.products.removeWhere((it) => it.id == item.id);
-          user.products.removeAt(index);
-        });
-      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historial de Compras.'),
@@ -50,8 +47,8 @@ class _HistoryShopScreen extends State<HistoryShopScreen> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   restorationId: 'sampleItemListView',
-                  itemCount: user.historyShop.length,
-                  itemBuilder: buildListItem,
+                  itemCount: cart.historyShop.length,
+                  itemBuilder: (ctx, i) => buildListItem(ctx, cart, i),
                   separatorBuilder: (BuildContext context, int index) =>
                       const Divider(),
                 ),

@@ -6,22 +6,21 @@ import 'package:carrito/src/model/shop.dart';
 import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../data/user.dart' as user;
+import '../data/cart_provider.dart';
 import '../model/product.dart';
 import '../settings/settings_view.dart';
 import '../styles/styles.dart';
 import 'product_form_screen.dart';
 
-// ignore: use_key_in_widget_constructors
 class ProductListScreen extends StatefulWidget {
   final SettingsController settings;
   const ProductListScreen({super.key, required this.settings});
 
   static const routeName = '/';
   @override
-  // ignore: library_private_types_in_public_api
-  _ProductListScreen createState() => _ProductListScreen();
+  State<ProductListScreen> createState() => _ProductListScreen();
 }
 
 class _ProductListScreen extends State<ProductListScreen> {
@@ -29,10 +28,10 @@ class _ProductListScreen extends State<ProductListScreen> {
   bool CantSelected = false;
   int GraphSelected = 0;
 
-  double totalPriceCategory(String categoria) {
+  double totalPriceCategory(List<Product> products, String categoria) {
     double total = 0, totalCant = 0;
 
-    for (Product item in user.products) {
+    for (Product item in products) {
       if (item.categoria.nombre == categoria) {
         if (CantSelected) {
           totalCant += item.cantidad;
@@ -44,35 +43,15 @@ class _ProductListScreen extends State<ProductListScreen> {
     return CantSelected ? totalCant : total;
   }
 
-  double totalPriceNeed(bool necesidad) {
+  double totalPriceNeed(List<Product> products, bool necesidad) {
     double total = 0;
-    for (Product item in user.products) {
+    for (Product item in products) {
       if (item.necesidad == necesidad) {
         if (CantSelected) {
           total += item.cantidad;
         } else {
           total += item.cantidad * item.precio;
         }
-      }
-    }
-    return total;
-  }
-
-  double totalCantCategory(String categoria) {
-    double total = 0;
-    for (Product item in user.products) {
-      if (item.categoria.nombre == categoria) {
-        total += item.cantidad;
-      }
-    }
-    return total;
-  }
-
-  double totalCantNeed(bool necesidad) {
-    double total = 0;
-    for (Product item in user.products) {
-      if (item.necesidad == necesidad) {
-        total += item.cantidad;
       }
     }
     return total;
@@ -111,7 +90,7 @@ class _ProductListScreen extends State<ProductListScreen> {
     );
   }
 
-  Widget buildGraphSection(int cantU, int cantP) {
+  Widget buildGraphSection(List<Product> products, int cantU, int cantP) {
     return Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         Text("Cant Unidades: $cantU"),
@@ -131,7 +110,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                     if (GraphSelected == 0)
                       for (Categoryy cat in categorias) ...[
                         PieChartSectionData(
-                          value: totalPriceCategory(cat.nombre),
+                          value: totalPriceCategory(products, cat.nombre),
                           color: cat.color,
                           titleStyle: const TextStyle(
                             color: Colors.white,
@@ -141,12 +120,12 @@ class _ProductListScreen extends State<ProductListScreen> {
                             ],
                           ),
                           title:
-                              "${cat.nombre}\n(${CantSelected ? totalPriceCategory(cat.nombre).toString() : "\$${totalPriceCategory(cat.nombre).toStringAsFixed(2)}"})",
+                              "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})",
                         ),
                       ],
                     if (GraphSelected == 1) ...[
                       PieChartSectionData(
-                        value: totalPriceNeed(true),
+                        value: totalPriceNeed(products, true),
                         color: needColor,
                         titleStyle: const TextStyle(
                           color: Colors.white,
@@ -156,10 +135,10 @@ class _ProductListScreen extends State<ProductListScreen> {
                           ],
                         ),
                         title:
-                            "Necesito\n(${CantSelected ? totalPriceNeed(true).toString() : "\$${totalPriceNeed(true).toStringAsFixed(2)}"})",
+                            "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})",
                       ),
                       PieChartSectionData(
-                        value: totalPriceNeed(false),
+                        value: totalPriceNeed(products, false),
                         color: wantColor,
                         titleStyle: const TextStyle(
                           color: Colors.white,
@@ -169,7 +148,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                           ],
                         ),
                         title:
-                            "Quiero\n(${CantSelected ? totalPriceNeed(false).toString() : "\$${totalPriceNeed(false).toStringAsFixed(2)}"})",
+                            "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})",
                       ),
                     ]
                   ],
@@ -193,8 +172,6 @@ class _ProductListScreen extends State<ProductListScreen> {
                       setState(() {
                         CantSelected = !CantSelected;
                       });
-                      print(
-                          "category graph selected:$CantSelected");
                     },
                   ),
                   IconButton(
@@ -203,7 +180,6 @@ class _ProductListScreen extends State<ProductListScreen> {
                       setState(() {
                         GraphSelected = 0;
                       });
-                      print("category graph selected");
                     },
                   ),
                   IconButton(
@@ -212,7 +188,6 @@ class _ProductListScreen extends State<ProductListScreen> {
                       setState(() {
                         GraphSelected = 1;
                       });
-                      print("needed graph selected");
                     },
                   ),
                 ],
@@ -224,8 +199,8 @@ class _ProductListScreen extends State<ProductListScreen> {
     ]);
   }
 
-  Widget buildListItem(BuildContext context, int index) {
-    Product item = user.products[index];
+  Widget buildListItem(BuildContext context, CartProvider cart, int index) {
+    Product item = cart.products[index];
     double unitTotal = item.precio * item.cantidad;
 
     return ListTile(
@@ -233,7 +208,7 @@ class _ProductListScreen extends State<ProductListScreen> {
       subtitle: Text("${item.cantidad}u. \$${item.precio.toStringAsFixed(2)}"),
       leading: CircleAvatar(
         backgroundColor: item.categoria.color,
-        child: item.categoria.icon,
+        child: Icon(item.categoria.iconData),
       ),
       onTap: () {
         Navigator.push(
@@ -242,10 +217,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                 builder: (_) => ProductFormScreen(
                     item: item, settings: widget.settings))).then((newItem) {
           if (newItem != null) {
-            setState(() {
-              int id = user.products.indexOf(item);
-              user.products[id] = newItem;
-            });
+            cart.updateProduct(index, newItem);
           }
         });
       },
@@ -254,24 +226,17 @@ class _ProductListScreen extends State<ProductListScreen> {
         style: TextStyle(color: priceColor, fontSize: 24),
       ),
       onLongPress: () {
-        setState(() {
-          //user.products.removeWhere((it) => it.id == item.id);
-          user.products.removeAt(index);
-        });
+        cart.removeProductAt(index);
       },
     );
   }
 
-  double calcularTotalProductos() {
-    return user.products
-        .fold(0, (sum, item) => sum + (item.cantidad * item.precio));
-  }
-
   @override
   Widget build(BuildContext context) {
-    double total = calcularTotalProductos();
-    int cant = user.products.fold(0, (sum, item) => sum + (item.cantidad));
-    // String totalStr = total.toString(); // formatPrice(total);
+    final cart = context.watch<CartProvider>();
+    final products = cart.products;
+    double total = cart.totalProducts;
+    int cant = products.fold(0, (sum, item) => sum + (item.cantidad));
 
     return Scaffold(
       appBar: AppBar(
@@ -279,25 +244,21 @@ class _ProductListScreen extends State<ProductListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check_outlined),
-            onPressed: user.products.isNotEmpty
+            onPressed: products.isNotEmpty
                 ? () {
-                    setState(() {
-                      user.historyShop.add(Shop(1, Market(1, "Dia"),
-                          DateTime.now(), user.products, total));
-
-                      user.products = [];
-
-                      print(">>added in history");
-                    });
+                    cart.addToHistory(Shop(
+                        1, Market(1, "Dia"), DateTime.now(), products, total));
                   }
                 : null,
           ),
-          if (user.historyShop.isNotEmpty)
+          if (cart.historyShop.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.history),
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const HistoryShopScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const HistoryShopScreen()));
               },
             ),
           IconButton(
@@ -313,7 +274,7 @@ class _ProductListScreen extends State<ProductListScreen> {
           child: Column(
             children: [
               buildTotalSection(total),
-              if (showGraph) buildGraphSection(cant, user.products.length),
+              if (showGraph) buildGraphSection(products, cant, products.length),
               SizedBox(
                 height: showGraph
                     ? MediaQuery.of(context).size.height - 430
@@ -321,8 +282,8 @@ class _ProductListScreen extends State<ProductListScreen> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   restorationId: 'sampleItemListView',
-                  itemCount: user.products.length,
-                  itemBuilder: buildListItem,
+                  itemCount: products.length,
+                  itemBuilder: (ctx, i) => buildListItem(ctx, cart, i),
                   separatorBuilder: (BuildContext context, int index) =>
                       const Divider(),
                 ),
@@ -338,13 +299,7 @@ class _ProductListScreen extends State<ProductListScreen> {
               MaterialPageRoute(
                   builder: (_) => ProductFormScreen(
                       settings: widget.settings,
-                      lastIndex: user.products.isNotEmpty
-                          ? user.products.last.id
-                          : null))).then((newItem) {
-            if (newItem != null) {
-              setState(() {});
-            }
-          });
+                      lastIndex: cart.nextProductId - 1)));
         },
         tooltip: 'Agregar item',
         child: const Icon(Icons.add_shopping_cart_outlined),

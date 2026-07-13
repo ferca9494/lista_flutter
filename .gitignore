@@ -47,3 +47,4 @@ pubspec.lock
 /android/*
 windows/flutter/CMakeLists.txt
 android/gradle/wrapper/gradle-wrapper.properties
+/CarritoVault/*

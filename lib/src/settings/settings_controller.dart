@@ -55,5 +55,6 @@ class SettingsController with ChangeNotifier {
 
   Future<void> updateAnimations(bool permitAnimations) async {
     _activeAnimations = permitAnimations;
+    notifyListeners();
   }
 }

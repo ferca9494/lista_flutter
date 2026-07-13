@@ -1,35 +1,32 @@
-// ignore_for_file: avoid_print, prefer_interpolation_to_compose_strings
-
 import 'package:carrito/src/animations_screens/add_cart_anim.dart';
 import 'package:carrito/src/model/category.dart';
 import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:carrito/src/styles/buttons.dart';
 import 'package:carrito/src/styles/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../data/cart_provider.dart';
 import '../data/categorys.dart';
-import '../data/user.dart' as user;
 import '../model/product.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final int? lastIndex;
   final Product? item;
   final SettingsController settings;
-  const ProductFormScreen({super.key, this.item, this.lastIndex, required this.settings});
+  const ProductFormScreen(
+      {super.key, this.item, this.lastIndex, required this.settings});
   @override
   _ProductFormScreen createState() => _ProductFormScreen();
   static const routeName = '/add_sample_item';
 }
 
-/// Displays detailed information about a SampleItem.
 class _ProductFormScreen extends State<ProductFormScreen> {
-  //static const routeName = '/add_sample_item';
-
   TextEditingController nombreController = TextEditingController();
   TextEditingController cantidadController = TextEditingController(text: "1");
   TextEditingController precioController = TextEditingController();
 
-  String namePlaceholder = "Producto " + (user.products.length + 1).toString();
+  late String namePlaceholder;
   int _selectedCate = 0;
 
   int id_item = 0;
@@ -39,6 +36,8 @@ class _ProductFormScreen extends State<ProductFormScreen> {
   @override
   void initState() {
     super.initState();
+    final cart = context.read<CartProvider>();
+    namePlaceholder = "Producto ${cart.products.length + 1}";
     if (widget.item == null) return;
     Product item = widget.item!;
     nombreController = TextEditingController(text: item.nombre);
@@ -54,13 +53,9 @@ class _ProductFormScreen extends State<ProductFormScreen> {
       return;
     }
 
-    setState(() {
-      print("nombre: " + nombreController.text);
-      print("precio: " + precioController.text);
-      print("cantidad: " + cantidadController.text);
-      print("pressed");
-      //TODO: adaptar a modificacion de producto
+    final cart = context.read<CartProvider>();
 
+    setState(() {
       Product newProduct;
 
       if (widget.item != null) {
@@ -84,7 +79,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
             double.parse(precioController.text),
             categorias[_selectedCate],
             necesidad);
-        user.products.add(newProduct);
+        cart.addProduct(newProduct);
       }
       if (widget.settings.activeAnimations) {
         add_cart_animation(newProduct);
@@ -101,7 +96,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
           builder: (context) => addcart_animscreen(
               item: CircleAvatar(
                 backgroundColor: categorias[_selectedCate].color,
-                child: categorias[_selectedCate].icon,
+                child: Icon(categorias[_selectedCate].iconData),
               ),
               onFinish: () {
                 Navigator.pop(context, newProduct);
@@ -172,7 +167,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "Categoria: " + categorias[_selectedCate].nombre,
+                  "Categoria: ${categorias[_selectedCate].nombre}",
                 ),
                 Wrap(
                   children: [
@@ -191,7 +186,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                                   child: CircleAvatar(
                                     radius: _selectedCate == cat.id ? 28 : 30,
                                     backgroundColor: cat.color,
-                                    child: cat.icon,
+                                    child: Icon(cat.iconData),
                                   ))))
                   ],
                 ),
@@ -205,7 +200,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                           setState(() {
                             necesidad = true;
                           });
-                          print(necesidad);
                         },
                         child: const Text("Necesito!")),
                     ElevatedButton(
@@ -214,7 +208,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                           setState(() {
                             necesidad = false;
                           });
-                          print(necesidad);
                         },
                         child: const Text("Quiero!")),
                   ],
@@ -224,7 +217,6 @@ class _ProductFormScreen extends State<ProductFormScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: save,
-        //precioController.text.isEmpty ? save : null,
         tooltip: 'Agregar item',
         backgroundColor:
             precioController.text.isEmpty ? Colors.grey : Colors.greenAccent,
@@ -233,14 +225,3 @@ class _ProductFormScreen extends State<ProductFormScreen> {
     );
   }
 }
-
-inputDeco(name, hint) => InputDecoration(
-      hintText: hint,
-      labelText: name,
-      fillColor: Colors.white,
-      focusedBorder: const OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color.fromARGB(255, 162, 162, 162),
-        ),
-      ),
-    );

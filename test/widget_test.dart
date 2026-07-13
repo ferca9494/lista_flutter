@@ -1,33 +1,53 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:carrito/src/app.dart';
+import 'package:carrito/src/data/cart_provider.dart';
 import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:carrito/src/settings/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  Widget buildApp() {
     final settingsController = SettingsController(SettingsService());
-    await settingsController.loadSettings();
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(settingsController: settingsController));
+    final cart = CartProvider();
+    return ChangeNotifierProvider<CartProvider>.value(
+      value: cart,
+      child: MyApp(settingsController: settingsController),
+    );
+  }
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('App renders product list screen', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    expect(find.text('Lista de la compra.'), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('Empty cart shows no list items', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNothing);
+  });
+
+  testWidgets('FAB navigates to product form', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.add_shopping_cart_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Agregar Item'), findsOneWidget);
+  });
+
+  testWidgets('Settings icon navigates to settings', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Activar/Desactivar animaciones'), findsOneWidget);
   });
 }
