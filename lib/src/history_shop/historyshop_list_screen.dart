@@ -14,11 +14,24 @@ class HistoryShopScreen extends StatefulWidget {
 class _HistoryShopScreen extends State<HistoryShopScreen> {
   static const routeName = '/history';
 
+  String _formatDate(DateTime date) {
+    const months = [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    final day = date.day;
+    final month = months[date.month - 1];
+    final year = date.year;
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day $month $year · $hour:$minute';
+  }
+
   Widget buildListItem(BuildContext context, CartProvider cart, int index) {
     Shop item = cart.historyShop[index];
     return ListTile(
       title: Text(item.market.name),
-      subtitle: Text("${item.date}"),
+      subtitle: Text(_formatDate(item.date)),
       leading: const CircleAvatar(
         child: Icon(Icons.shopping_bag_outlined),
       ),

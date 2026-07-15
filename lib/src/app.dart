@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 //import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'home_screen.dart';
 import 'product_feature/product_form_screen.dart';
 import 'product_feature/product_list_screen.dart';
 import 'settings/settings_controller.dart';
@@ -70,10 +71,12 @@ class MyApp extends StatelessWidget {
                     return SettingsView(controller: settingsController);
                   case ProductFormScreen.routeName:
                     return ProductFormScreen(settings: settingsController);
-
                   case ProductListScreen.routeName:
-                  default:
                     return ProductListScreen(settings: settingsController);
+
+                  case HomeScreen.routeName:
+                  default:
+                    return HomeScreen(settings: settingsController);
                 }
               },
             );

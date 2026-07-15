@@ -92,107 +92,120 @@ class _ProductListScreen extends State<ProductListScreen> {
 
   Widget buildGraphSection(List<Product> products, int cantU, int cantP) {
     return Column(children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        Text("Cant Unidades: $cantU"),
-        Text("Cant. Productos: $cantP")
-      ]),
       Container(
         width: 300,
-        height: 180,
+        height: 280,
         padding: const EdgeInsets.all(15),
         child: Row(
           children: [
-            Expanded(
-              flex: 10,
-              child: PieChart(
-                PieChartData(
-                  sections: [
-                    if (GraphSelected == 0)
-                      for (Categoryy cat in categorias) ...[
-                        PieChartSectionData(
-                          value: totalPriceCategory(products, cat.nombre),
-                          color: cat.color,
-                          titleStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(color: Colors.black, offset: Offset(1, 1)),
-                            ],
-                          ),
-                          title:
-                              "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})",
-                        ),
-                      ],
-                    if (GraphSelected == 1) ...[
-                      PieChartSectionData(
-                        value: totalPriceNeed(products, true),
-                        color: needColor,
-                        titleStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(color: Colors.black, offset: Offset(1, 1)),
-                          ],
-                        ),
-                        title:
-                            "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})",
-                      ),
-                      PieChartSectionData(
-                        value: totalPriceNeed(products, false),
-                        color: wantColor,
-                        titleStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(color: Colors.black, offset: Offset(1, 1)),
-                          ],
-                        ),
-                        title:
-                            "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})",
-                      ),
-                    ]
-                  ],
-                ),
-                swapAnimationDuration: const Duration(milliseconds: 150),
-                swapAnimationCurve: Curves.linear,
-              ),
-            ),
             const SizedBox(
-              width: 50,
+              width: 15,
             ),
             Expanded(
-              flex: 1,
-              child: Column(
-                children: [
-                  IconButton(
-                    icon: Icon(CantSelected
-                        ? Icons.change_circle_sharp
-                        : Icons.currency_exchange_sharp),
-                    onPressed: () {
-                      setState(() {
-                        CantSelected = !CantSelected;
-                      });
-                    },
+                flex: 15,
+                child: Stack(children: [
+                  Center(
+                    child: Text("$cantU u. \n $cantP p.",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.category),
-                    onPressed: () {
-                      setState(() {
-                        GraphSelected = 0;
-                      });
-                    },
+                  PieChart(
+                    PieChartData(
+                      sections: [
+                        if (GraphSelected == 0)
+                          for (Categoryy cat in categorias) ...[
+                            PieChartSectionData(
+                              value: totalPriceCategory(products, cat.nombre),
+                              color: cat.color,
+                              titleStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                      color: Colors.black,
+                                      offset: Offset(1, 1)),
+                                ],
+                              ),
+                              title:
+                                  "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})",
+                            ),
+                          ],
+                        if (GraphSelected == 1) ...[
+                          PieChartSectionData(
+                            value: totalPriceNeed(products, true),
+                            color: needColor,
+                            titleStyle: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                    color: Colors.black, offset: Offset(1, 1)),
+                              ],
+                            ),
+                            title:
+                                "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})",
+                          ),
+                          PieChartSectionData(
+                            value: totalPriceNeed(products, false),
+                            color: wantColor,
+                            titleStyle: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                    color: Colors.black, offset: Offset(1, 1)),
+                              ],
+                            ),
+                            title:
+                                "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})",
+                          ),
+                        ]
+                      ],
+                    ),
+                    swapAnimationDuration: const Duration(milliseconds: 150),
+                    swapAnimationCurve: Curves.linear,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.back_hand),
-                    onPressed: () {
-                      setState(() {
-                        GraphSelected = 1;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            )
+                ])),
+            Expanded(
+                flex: 1,
+                child: Container(
+                  child: products.isEmpty
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            IconButton(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              icon: Icon(CantSelected
+                                  ? Icons.change_circle_sharp
+                                  : Icons.currency_exchange_sharp),
+                              onPressed: () {
+                                setState(() {
+                                  CantSelected = !CantSelected;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              icon: const Icon(Icons.category),
+                              onPressed: () {
+                                setState(() {
+                                  GraphSelected = 0;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              icon: const Icon(Icons.back_hand),
+                              onPressed: () {
+                                setState(() {
+                                  GraphSelected = 1;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                ))
           ],
         ),
       )
@@ -272,23 +285,30 @@ class _ProductListScreen extends State<ProductListScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            children: [
-              buildTotalSection(total),
-              if (showGraph) buildGraphSection(products, cant, products.length),
-              SizedBox(
-                height: showGraph
-                    ? MediaQuery.of(context).size.height - 430
-                    : MediaQuery.of(context).size.height,
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  restorationId: 'sampleItemListView',
-                  itemCount: products.length,
-                  itemBuilder: (ctx, i) => buildListItem(ctx, cart, i),
-                  separatorBuilder: (BuildContext context, int index) =>
-                      const Divider(),
-                ),
-              ),
-            ],
+            children: products.isEmpty
+                ? [
+                    const SizedBox(height: 100),
+                    const Center(
+                      child: Text(
+                        "No hay productos en la lista.",
+                        style: TextStyle(fontSize: 24),
+                      ),
+                    ),
+                  ]
+                : [
+                    buildTotalSection(total),
+                    if (showGraph)
+                      buildGraphSection(products, cant, products.length),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      restorationId: 'sampleItemListView',
+                      itemCount: products.length,
+                      itemBuilder: (ctx, i) => buildListItem(ctx, cart, i),
+                      separatorBuilder: (BuildContext context, int index) =>
+                          const Divider(),
+                    ),
+                  ],
           ),
         ),
       ),
@@ -301,7 +321,7 @@ class _ProductListScreen extends State<ProductListScreen> {
                       settings: widget.settings,
                       lastIndex: cart.nextProductId - 1)));
         },
-        tooltip: 'Agregar item',
+        tooltip: 'Agregar Producto',
         child: const Icon(Icons.add_shopping_cart_outlined),
       ),
     );

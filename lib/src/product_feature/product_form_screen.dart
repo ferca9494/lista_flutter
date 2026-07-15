@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:carrito/src/animations_screens/add_cart_anim.dart';
 import 'package:carrito/src/model/category.dart';
 import 'package:carrito/src/settings/settings_controller.dart';
 import 'package:carrito/src/styles/buttons.dart';
 import 'package:carrito/src/styles/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/cart_provider.dart';
@@ -32,12 +35,16 @@ class _ProductFormScreen extends State<ProductFormScreen> {
   int id_item = 0;
   int id_categoria = 0;
   bool necesidad = false;
+  bool showCategorias = false;
+
+  List<Map<String, dynamic>> _productsCatalog = [];
 
   @override
   void initState() {
     super.initState();
     final cart = context.read<CartProvider>();
     namePlaceholder = "Producto ${cart.products.length + 1}";
+    _loadProducts();
     if (widget.item == null) return;
     Product item = widget.item!;
     nombreController = TextEditingController(text: item.nombre);
@@ -45,7 +52,16 @@ class _ProductFormScreen extends State<ProductFormScreen> {
     precioController = TextEditingController(text: item.precio.toString());
     id_item = item.id;
     id_categoria = item.categoria.id;
+    _selectedCate = item.categoria.id;
     necesidad = item.necesidad;
+  }
+
+  Future<void> _loadProducts() async {
+    final data = await rootBundle.loadString('lib/src/data/products.json');
+    final json = jsonDecode(data) as Map<String, dynamic>;
+    setState(() {
+      _productsCatalog = List<Map<String, dynamic>>.from(json['products']);
+    });
   }
 
   save() {
@@ -115,12 +131,114 @@ class _ProductFormScreen extends State<ProductFormScreen> {
             padding: const EdgeInsets.all(16.9),
             child: Form(
               child: Column(children: [
+                /** INPUT DE NOMBRE Y CATEGORIA */
                 const SizedBox(height: 32),
-                TextFormField(
-                  controller: nombreController,
-                  decoration: inputDeco(namePlaceholder, ""),
+                SizedBox(
+                  height: 56,
+                  child: Row(children: [
+                    Expanded(
+                      flex: 4,
+                      child: Autocomplete<Map<String, dynamic>>(
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text.isEmpty) {
+                            return const Iterable.empty();
+                          }
+                          return _productsCatalog.where((p) => (p['name']
+                                  as String)
+                              .toLowerCase()
+                              .contains(textEditingValue.text.toLowerCase()));
+                        },
+                        onSelected: (Map<String, dynamic> product) {
+                          nombreController.text = product['name'];
+                          setState(() {
+                            _selectedCate = product['categoriaId'] as int;
+                          });
+                        },
+                        displayStringForOption: (p) => p['name'] as String,
+                        fieldViewBuilder:
+                            (context, controller, focusNode, onSubmitted) {
+                          controller.text = nombreController.text;
+                          controller.selection = nombreController.selection;
+                          controller.addListener(() {
+                            nombreController.text = controller.text;
+                            nombreController.selection = controller.selection;
+                          });
+                          return TextFormField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            onEditingComplete: onSubmitted,
+                            decoration: inputDeco(namePlaceholder, ""),
+                          );
+                        },
+                      ),
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showCategorias = !showCategorias;
+                              });
+                            },
+                            child: Container(
+                                margin: const EdgeInsets.all(6),
+                                child: CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: Colors.black,
+                                    child: CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor:
+                                          categorias[_selectedCate].color,
+                                      child: Icon(
+                                          categorias[_selectedCate].iconData,
+                                          size: 20),
+                                    ))))),
+                  ]),
                 ),
+                showCategorias
+                    ? Column(
+                        children: [
+                          Text(
+                            "Categoria: ${categorias[_selectedCate].nombre}",
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            children: [
+                              for (Categoryy cat in categorias)
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedCate = cat.id;
+                                        showCategorias = false;
+                                      });
+                                    },
+                                    child: Container(
+                                        margin: const EdgeInsets.all(6),
+                                        child: Tooltip(
+                                          message: cat.nombre,
+                                          child: CircleAvatar(
+                                              radius: 22,
+                                              backgroundColor:
+                                                  _selectedCate == cat.id
+                                                      ? Colors.black
+                                                      : Colors.transparent,
+                                              child: CircleAvatar(
+                                                radius: _selectedCate == cat.id
+                                                    ? 20
+                                                    : 22,
+                                                backgroundColor: cat.color,
+                                                child: Icon(cat.iconData,
+                                                    size: 20),
+                                              )),
+                                        )))
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      )
+                    : const SizedBox(height: 0),
                 const SizedBox(height: 16),
+                /** INPUT DE CANTIDAD */
                 Row(children: [
                   Expanded(
                       flex: 4,
@@ -157,6 +275,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                       ]))
                 ]),
                 const SizedBox(height: 16),
+                /** INPUT DE PRECIO */
                 TextFormField(
                   autofocus: true,
                   controller: precioController,
@@ -166,31 +285,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                   decoration: inputDeco("Precio (\$)", "\$1"),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  "Categoria: ${categorias[_selectedCate].nombre}",
-                ),
-                Wrap(
-                  children: [
-                    for (Categoryy cat in categorias)
-                      GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedCate = cat.id;
-                            });
-                          },
-                          child: Container(
-                              margin: const EdgeInsets.all(15),
-                              child: CircleAvatar(
-                                  radius: 30,
-                                  backgroundColor: Colors.black,
-                                  child: CircleAvatar(
-                                    radius: _selectedCate == cat.id ? 28 : 30,
-                                    backgroundColor: cat.color,
-                                    child: Icon(cat.iconData),
-                                  ))))
-                  ],
-                ),
-                const SizedBox(height: 32),
+                /** INPUT DE NECESIDAD */
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
