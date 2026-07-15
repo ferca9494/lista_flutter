@@ -61,7 +61,59 @@ class _ProductListScreen extends State<ProductListScreen> {
     return price.formatNumber();
   }
 
-  Widget buildTotalSection(double total) {
+  Color _totalColor(CartProvider cart) {
+    if (cart.isOverBudget) return Colors.red;
+    if (cart.isNearBudget) return Colors.orange;
+    return priceColor;
+  }
+
+  void _showBudgetDialog(CartProvider cart) {
+    final controller = TextEditingController(
+      text: cart.budget != null ? cart.budget!.toStringAsFixed(2) : '',
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Presupuesto'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            labelText: 'Monto máximo',
+            prefixText: '\$ ',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          if (cart.budget != null)
+            TextButton(
+              onPressed: () {
+                cart.clearBudget();
+                Navigator.pop(ctx);
+              },
+              child: const Text('Quitar'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = double.tryParse(controller.text);
+              if (value != null && value > 0) {
+                cart.setBudget(value);
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildTotalSection(double total, CartProvider cart) {
+    final color = _totalColor(cart);
     return Container(
       padding: const EdgeInsets.all(15),
       child: Row(
@@ -81,16 +133,35 @@ class _ProductListScreen extends State<ProductListScreen> {
               const Text("Total", style: TextStyle(fontSize: 24)),
             ],
           ),
-          Text(
-            "\$${total.toStringAsFixed(2)}",
-            style: TextStyle(fontSize: 28, color: priceColor),
+          Row(
+            children: [
+              if (cart.isOverBudget)
+                const Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: Icon(Icons.warning_amber, color: Colors.red, size: 24),
+                ),
+              Text(
+                "\$${total.toStringAsFixed(2)}",
+                style: TextStyle(fontSize: 28, color: color),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showBudgetDialog(cart),
+                child: Icon(
+                  Icons.savings_outlined,
+                  color: cart.budget != null ? Colors.teal : Colors.grey,
+                  size: 26,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget buildGraphSection(List<Product> products, int cantU, int cantP) {
+  Widget buildGraphSection(
+      List<Product> products, int cantU, int cantP, CartProvider cart) {
     return Column(children: [
       Container(
         width: 300,
@@ -98,6 +169,40 @@ class _ProductListScreen extends State<ProductListScreen> {
         padding: const EdgeInsets.all(15),
         child: Row(
           children: [
+            if (cart.budget != null) ...[
+              const SizedBox(height: 4),
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: Stack(
+                  alignment: Alignment.center,
+                  fit: StackFit.expand,
+                  children: [
+                    CircularProgressIndicator(
+                      value: cart.budgetPercentage.clamp(0.0, 1.0),
+                      strokeWidth: 20,
+                      backgroundColor: Colors.grey.shade300,
+                      color: _totalColor(cart),
+                    ),
+                    Text(
+                      "${(cart.budgetPercentage * 100).toInt()}%",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(0.5, 0.5),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(
               width: 15,
             ),
@@ -169,43 +274,41 @@ class _ProductListScreen extends State<ProductListScreen> {
                 ])),
             Expanded(
                 flex: 1,
-                child: Container(
-                  child: products.isEmpty
-                      ? const SizedBox.shrink()
-                      : Column(
-                          children: [
-                            IconButton(
-                              padding: const EdgeInsets.only(bottom: 20),
-                              icon: Icon(CantSelected
-                                  ? Icons.change_circle_sharp
-                                  : Icons.currency_exchange_sharp),
-                              onPressed: () {
-                                setState(() {
-                                  CantSelected = !CantSelected;
-                                });
-                              },
-                            ),
-                            IconButton(
-                              padding: const EdgeInsets.only(bottom: 20),
-                              icon: const Icon(Icons.category),
-                              onPressed: () {
-                                setState(() {
-                                  GraphSelected = 0;
-                                });
-                              },
-                            ),
-                            IconButton(
-                              padding: const EdgeInsets.only(bottom: 20),
-                              icon: const Icon(Icons.back_hand),
-                              onPressed: () {
-                                setState(() {
-                                  GraphSelected = 1;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                ))
+                child: products.isEmpty
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          IconButton(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            icon: Icon(CantSelected
+                                ? Icons.change_circle_sharp
+                                : Icons.currency_exchange_sharp),
+                            onPressed: () {
+                              setState(() {
+                                CantSelected = !CantSelected;
+                              });
+                            },
+                          ),
+                          IconButton(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            icon: const Icon(Icons.category),
+                            onPressed: () {
+                              setState(() {
+                                GraphSelected = 0;
+                              });
+                            },
+                          ),
+                          IconButton(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            icon: const Icon(Icons.back_hand),
+                            onPressed: () {
+                              setState(() {
+                                GraphSelected = 1;
+                              });
+                            },
+                          ),
+                        ],
+                      ))
           ],
         ),
       )
@@ -260,7 +363,8 @@ class _ProductListScreen extends State<ProductListScreen> {
             onPressed: products.isNotEmpty
                 ? () {
                     cart.addToHistory(Shop(
-                        1, Market(1, "Dia"), DateTime.now(), products, total));
+                        1, Market(1, "Dia"), DateTime.now(), products, total,
+                        budget: cart.budget));
                   }
                 : null,
           ),
@@ -296,9 +400,9 @@ class _ProductListScreen extends State<ProductListScreen> {
                     ),
                   ]
                 : [
-                    buildTotalSection(total),
+                    buildTotalSection(total, cart),
                     if (showGraph)
-                      buildGraphSection(products, cant, products.length),
+                      buildGraphSection(products, cant, products.length, cart),
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),

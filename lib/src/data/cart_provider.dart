@@ -8,15 +8,39 @@ import '../model/shop.dart';
 
 const _kProductsKey = 'cart_products';
 const _kHistoryKey = 'cart_history';
+const _kBudgetKey = 'cart_budget';
 
 class CartProvider extends ChangeNotifier {
   List<Product> products = [];
   List<Shop> historyShop = [];
+  double? _budget;
+
+  double? get budget => _budget;
+
+  double get budgetPercentage =>
+      _budget != null && _budget! > 0 ? totalProducts / _budget! : 0;
+
+  bool get isNearBudget => _budget != null && budgetPercentage >= 0.8 && !isOverBudget;
+
+  bool get isOverBudget => _budget != null && totalProducts > _budget!;
+
+  void setBudget(double amount) {
+    _budget = amount;
+    notifyListeners();
+    _persist();
+  }
+
+  void clearBudget() {
+    _budget = null;
+    notifyListeners();
+    _persist();
+  }
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final productsJson = prefs.getString(_kProductsKey);
     final historyJson = prefs.getString(_kHistoryKey);
+    final budgetValue = prefs.getDouble(_kBudgetKey);
 
     if (productsJson != null) {
       products = (jsonDecode(productsJson) as List)
@@ -28,6 +52,7 @@ class CartProvider extends ChangeNotifier {
           .map((e) => Shop.fromJson(e as Map<String, dynamic>))
           .toList();
     }
+    _budget = budgetValue;
     notifyListeners();
   }
 
@@ -37,6 +62,11 @@ class CartProvider extends ChangeNotifier {
         _kProductsKey, jsonEncode(products.map((p) => p.toJson()).toList()));
     await prefs.setString(
         _kHistoryKey, jsonEncode(historyShop.map((s) => s.toJson()).toList()));
+    if (_budget != null) {
+      await prefs.setDouble(_kBudgetKey, _budget!);
+    } else {
+      await prefs.remove(_kBudgetKey);
+    }
   }
 
   void addProduct(Product product) {
@@ -72,6 +102,7 @@ class CartProvider extends ChangeNotifier {
   void addToHistory(Shop shop) {
     historyShop.add(shop);
     products = [];
+    _budget = null;
     notifyListeners();
     _persist();
   }
