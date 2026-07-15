@@ -67,28 +67,55 @@ class _ProductListScreen extends State<ProductListScreen> {
     return priceColor;
   }
 
+  Color _productItemColor(CartProvider cart, Product product) {
+    if (cart.isProductOverBudget(product)) return Colors.red;
+    if (cart.isProductNearBudget(product)) return Colors.orange;
+    return priceColor;
+  }
+
   void _showBudgetDialog(CartProvider cart) {
-    final controller = TextEditingController(
+    final totalController = TextEditingController(
       text: cart.budget != null ? cart.budget!.toStringAsFixed(2) : '',
+    );
+    final productController = TextEditingController(
+      text: cart.productBudget != null
+          ? cart.productBudget!.toStringAsFixed(2)
+          : '',
     );
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Presupuesto'),
-        content: TextField(
-          controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(
-            labelText: 'Monto máximo',
-            prefixText: '\$ ',
-          ),
-          autofocus: true,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: totalController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Presupuesto total',
+                prefixText: '\$ ',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: productController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Presupuesto por producto',
+                prefixText: '\$ ',
+              ),
+            ),
+          ],
         ),
         actions: [
-          if (cart.budget != null)
+          if (cart.budget != null || cart.productBudget != null)
             TextButton(
               onPressed: () {
                 cart.clearBudget();
+                cart.clearProductBudget();
                 Navigator.pop(ctx);
               },
               child: const Text('Quitar'),
@@ -99,9 +126,13 @@ class _ProductListScreen extends State<ProductListScreen> {
           ),
           TextButton(
             onPressed: () {
-              final value = double.tryParse(controller.text);
-              if (value != null && value > 0) {
-                cart.setBudget(value);
+              final totalValue = double.tryParse(totalController.text);
+              if (totalValue != null && totalValue > 0) {
+                cart.setBudget(totalValue);
+              }
+              final productValue = double.tryParse(productController.text);
+              if (productValue != null && productValue > 0) {
+                cart.setProductBudget(productValue);
               }
               Navigator.pop(ctx);
             },
@@ -169,146 +200,175 @@ class _ProductListScreen extends State<ProductListScreen> {
         padding: const EdgeInsets.all(15),
         child: Row(
           children: [
-            if (cart.budget != null) ...[
-              const SizedBox(height: 4),
-              SizedBox(
-                width: 64,
-                height: 64,
-                child: Stack(
-                  alignment: Alignment.center,
-                  fit: StackFit.expand,
-                  children: [
-                    CircularProgressIndicator(
-                      value: cart.budgetPercentage.clamp(0.0, 1.0),
-                      strokeWidth: 20,
-                      backgroundColor: Colors.grey.shade300,
-                      color: _totalColor(cart),
-                    ),
-                    Text(
-                      "${(cart.budgetPercentage * 100).toInt()}%",
+            Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              if (cart.budget != null) ...[
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: [
+                      CircularProgressIndicator(
+                        value: cart.budgetPercentage.clamp(0.0, 1.0),
+                        strokeWidth: 20,
+                        backgroundColor: Colors.grey.shade300,
+                        color: _totalColor(cart),
+                      ),
+                      Text(
+                        "${(cart.budgetPercentage * 100).toInt()}%",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (cart.productBudget != null && products.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: [
+                      CircularProgressIndicator(
+                        value:
+                            cart.productsOverBudgetPercentage.clamp(0.0, 1.0),
+                        strokeWidth: 20,
+                        backgroundColor: Colors.grey.shade300,
+                        color: cart.productsOverBudgetPercentage >= 0.8
+                            ? Colors.red
+                            : cart.productsOverBudgetPercentage > 0
+                                ? Colors.orange
+                                : Colors.teal,
+                      ),
+                      Text(
+                        "${(cart.productsOverBudgetPercentage * 100).toInt()}%",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ]),
+            const SizedBox(width: 15),
+            Expanded(
+              flex: 15,
+              child: Stack(children: [
+                Center(
+                  child: Text("$cantU u. \n $cantP p.",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            offset: Offset(0.5, 0.5),
-                            blurRadius: 2,
+                          fontSize: 24, fontWeight: FontWeight.bold)),
+                ),
+                PieChart(
+                  PieChartData(
+                    sections: [
+                      if (GraphSelected == 0)
+                        for (Categoryy cat in categorias) ...[
+                          PieChartSectionData(
+                            value: totalPriceCategory(products, cat.nombre),
+                            color: cat.color,
+                            titleStyle: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                    color: Colors.black, offset: Offset(1, 1)),
+                              ],
+                            ),
+                            title:
+                                "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})",
                           ),
                         ],
-                      ),
-                    ),
-                  ],
+                      if (GraphSelected == 1) ...[
+                        PieChartSectionData(
+                          value: totalPriceNeed(products, true),
+                          color: needColor,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(color: Colors.black, offset: Offset(1, 1)),
+                            ],
+                          ),
+                          title:
+                              "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})",
+                        ),
+                        PieChartSectionData(
+                          value: totalPriceNeed(products, false),
+                          color: wantColor,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(color: Colors.black, offset: Offset(1, 1)),
+                            ],
+                          ),
+                          title:
+                              "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})",
+                        ),
+                      ]
+                    ],
+                  ),
+                  swapAnimationDuration: const Duration(milliseconds: 150),
+                  swapAnimationCurve: Curves.linear,
                 ),
-              ),
-            ],
-            const SizedBox(
-              width: 15,
+              ]),
             ),
             Expanded(
-                flex: 15,
-                child: Stack(children: [
-                  Center(
-                    child: Text("$cantU u. \n $cantP p.",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
-                  ),
-                  PieChart(
-                    PieChartData(
-                      sections: [
-                        if (GraphSelected == 0)
-                          for (Categoryy cat in categorias) ...[
-                            PieChartSectionData(
-                              value: totalPriceCategory(products, cat.nombre),
-                              color: cat.color,
-                              titleStyle: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                      color: Colors.black,
-                                      offset: Offset(1, 1)),
-                                ],
-                              ),
-                              title:
-                                  "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})",
-                            ),
-                          ],
-                        if (GraphSelected == 1) ...[
-                          PieChartSectionData(
-                            value: totalPriceNeed(products, true),
-                            color: needColor,
-                            titleStyle: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                    color: Colors.black, offset: Offset(1, 1)),
-                              ],
-                            ),
-                            title:
-                                "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})",
-                          ),
-                          PieChartSectionData(
-                            value: totalPriceNeed(products, false),
-                            color: wantColor,
-                            titleStyle: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                    color: Colors.black, offset: Offset(1, 1)),
-                              ],
-                            ),
-                            title:
-                                "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})",
-                          ),
-                        ]
+              flex: 1,
+              child: products.isEmpty
+                  ? const SizedBox.shrink()
+                  : Column(
+                      children: [
+                        IconButton(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          icon: Icon(CantSelected
+                              ? Icons.change_circle_sharp
+                              : Icons.currency_exchange_sharp),
+                          onPressed: () {
+                            setState(() {
+                              CantSelected = !CantSelected;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          icon: const Icon(Icons.category),
+                          onPressed: () {
+                            setState(() {
+                              GraphSelected = 0;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          icon: const Icon(Icons.back_hand),
+                          onPressed: () {
+                            setState(() {
+                              GraphSelected = 1;
+                            });
+                          },
+                        ),
                       ],
                     ),
-                    swapAnimationDuration: const Duration(milliseconds: 150),
-                    swapAnimationCurve: Curves.linear,
-                  ),
-                ])),
-            Expanded(
-                flex: 1,
-                child: products.isEmpty
-                    ? const SizedBox.shrink()
-                    : Column(
-                        children: [
-                          IconButton(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            icon: Icon(CantSelected
-                                ? Icons.change_circle_sharp
-                                : Icons.currency_exchange_sharp),
-                            onPressed: () {
-                              setState(() {
-                                CantSelected = !CantSelected;
-                              });
-                            },
-                          ),
-                          IconButton(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            icon: const Icon(Icons.category),
-                            onPressed: () {
-                              setState(() {
-                                GraphSelected = 0;
-                              });
-                            },
-                          ),
-                          IconButton(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            icon: const Icon(Icons.back_hand),
-                            onPressed: () {
-                              setState(() {
-                                GraphSelected = 1;
-                              });
-                            },
-                          ),
-                        ],
-                      ))
+            ),
           ],
         ),
       )
@@ -318,6 +378,7 @@ class _ProductListScreen extends State<ProductListScreen> {
   Widget buildListItem(BuildContext context, CartProvider cart, int index) {
     Product item = cart.products[index];
     double unitTotal = item.precio * item.cantidad;
+    final color = _productItemColor(cart, item);
 
     return ListTile(
       title: Text(item.nombre),
@@ -337,9 +398,19 @@ class _ProductListScreen extends State<ProductListScreen> {
           }
         });
       },
-      trailing: Text(
-        "\$${unitTotal.toStringAsFixed(2)}",
-        style: TextStyle(color: priceColor, fontSize: 24),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (cart.isProductOverBudget(item))
+            const Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: Icon(Icons.warning_amber, color: Colors.red, size: 18),
+            ),
+          Text(
+            "\$${unitTotal.toStringAsFixed(2)}",
+            style: TextStyle(color: color, fontSize: 24),
+          ),
+        ],
       ),
       onLongPress: () {
         cart.removeProductAt(index);
@@ -364,7 +435,8 @@ class _ProductListScreen extends State<ProductListScreen> {
                 ? () {
                     cart.addToHistory(Shop(
                         1, Market(1, "Dia"), DateTime.now(), products, total,
-                        budget: cart.budget));
+                        budget: cart.budget,
+                        productBudget: cart.productBudget));
                   }
                 : null,
           ),

@@ -3,7 +3,7 @@ import 'package:carrito/src/model/product.dart';
 
 class Shop {
   Shop(this.id, this.market, this.date, this.productList, this.totalPrice,
-      {this.budget});
+      {this.budget, this.productBudget});
 
   final int id;
   final Market market;
@@ -11,6 +11,7 @@ class Shop {
   final List<Product> productList;
   final double totalPrice;
   final double? budget;
+  final double? productBudget;
 
   Shop copyWith({
     int? id,
@@ -19,6 +20,7 @@ class Shop {
     List<Product>? productList,
     double? totalPrice,
     double? budget,
+    double? productBudget,
   }) =>
       Shop(
         id ?? this.id,
@@ -27,6 +29,7 @@ class Shop {
         productList ?? this.productList,
         totalPrice ?? this.totalPrice,
         budget: budget ?? this.budget,
+        productBudget: productBudget ?? this.productBudget,
       );
 
   @override
@@ -38,10 +41,12 @@ class Shop {
           market == other.market &&
           date == other.date &&
           totalPrice == other.totalPrice &&
-          budget == other.budget;
+          budget == other.budget &&
+          productBudget == other.productBudget;
 
   @override
-  int get hashCode => Object.hash(id, market, date, totalPrice, budget);
+  int get hashCode =>
+      Object.hash(id, market, date, totalPrice, budget, productBudget);
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -50,6 +55,7 @@ class Shop {
         'productList': productList.map((p) => p.toJson()).toList(),
         'totalPrice': totalPrice,
         'budget': budget,
+        'productBudget': productBudget,
       };
 
   factory Shop.fromJson(Map<String, dynamic> json) => Shop(
@@ -62,6 +68,9 @@ class Shop {
         (json['totalPrice'] as num).toDouble(),
         budget: json['budget'] != null
             ? (json['budget'] as num).toDouble()
+            : null,
+        productBudget: json['productBudget'] != null
+            ? (json['productBudget'] as num).toDouble()
             : null,
       );
 }

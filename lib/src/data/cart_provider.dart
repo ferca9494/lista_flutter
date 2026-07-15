@@ -9,20 +9,47 @@ import '../model/shop.dart';
 const _kProductsKey = 'cart_products';
 const _kHistoryKey = 'cart_history';
 const _kBudgetKey = 'cart_budget';
+const _kProductBudgetKey = 'cart_product_budget';
 
 class CartProvider extends ChangeNotifier {
   List<Product> products = [];
   List<Shop> historyShop = [];
   double? _budget;
+  double? _productBudget;
 
   double? get budget => _budget;
+  double? get productBudget => _productBudget;
 
   double get budgetPercentage =>
       _budget != null && _budget! > 0 ? totalProducts / _budget! : 0;
 
-  bool get isNearBudget => _budget != null && budgetPercentage >= 0.8 && !isOverBudget;
+  bool get isNearBudget =>
+      _budget != null && budgetPercentage >= 0.8 && !isOverBudget;
 
   bool get isOverBudget => _budget != null && totalProducts > _budget!;
+
+  int get productsOverBudgetCount {
+    if (_productBudget == null || products.isEmpty) return 0;
+    return products
+        .where((p) => (p.cantidad * p.precio) > _productBudget!)
+        .length;
+  }
+
+  double get productsOverBudgetPercentage =>
+      products.isEmpty ? 0 : productsOverBudgetCount / products.length;
+
+  double productBudgetPercentage(Product product) =>
+      _productBudget != null && _productBudget! > 0
+          ? (product.cantidad * product.precio) / _productBudget!
+          : 0;
+
+  bool isProductNearBudget(Product product) {
+    final pct = productBudgetPercentage(product);
+    return _productBudget != null && pct >= 0.8 && !isProductOverBudget(product);
+  }
+
+  bool isProductOverBudget(Product product) =>
+      _productBudget != null && (product.cantidad * product.precio) > _productBudget!;
 
   void setBudget(double amount) {
     _budget = amount;
@@ -36,11 +63,24 @@ class CartProvider extends ChangeNotifier {
     _persist();
   }
 
+  void setProductBudget(double amount) {
+    _productBudget = amount;
+    notifyListeners();
+    _persist();
+  }
+
+  void clearProductBudget() {
+    _productBudget = null;
+    notifyListeners();
+    _persist();
+  }
+
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final productsJson = prefs.getString(_kProductsKey);
     final historyJson = prefs.getString(_kHistoryKey);
     final budgetValue = prefs.getDouble(_kBudgetKey);
+    final productBudgetValue = prefs.getDouble(_kProductBudgetKey);
 
     if (productsJson != null) {
       products = (jsonDecode(productsJson) as List)
@@ -53,6 +93,7 @@ class CartProvider extends ChangeNotifier {
           .toList();
     }
     _budget = budgetValue;
+    _productBudget = productBudgetValue;
     notifyListeners();
   }
 
@@ -66,6 +107,11 @@ class CartProvider extends ChangeNotifier {
       await prefs.setDouble(_kBudgetKey, _budget!);
     } else {
       await prefs.remove(_kBudgetKey);
+    }
+    if (_productBudget != null) {
+      await prefs.setDouble(_kProductBudgetKey, _productBudget!);
+    } else {
+      await prefs.remove(_kProductBudgetKey);
     }
   }
 
@@ -103,6 +149,7 @@ class CartProvider extends ChangeNotifier {
     historyShop.add(shop);
     products = [];
     _budget = null;
+    _productBudget = null;
     notifyListeners();
     _persist();
   }
