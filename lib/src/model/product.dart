@@ -10,7 +10,7 @@ class Product {
   final int cantidad;
   final double precio;
   final Categoryy categoria;
-  final bool necesidad;
+  final bool? necesidad;
 
   Product copyWith({
     int? id,
@@ -66,7 +66,7 @@ class Product {
       json['cantidad'] as int,
       (json['precio'] as num).toDouble(),
       cat,
-      json['necesidad'] as bool,
+      json['necesidad'] as bool?,
     );
   }
 }

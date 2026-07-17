@@ -25,6 +25,7 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreen extends State<ProductListScreen> {
   bool showGraph = false;
+  bool showTextGraph = true;
   bool CantSelected = false;
   int GraphSelected = 0;
 
@@ -43,7 +44,7 @@ class _ProductListScreen extends State<ProductListScreen> {
     return CantSelected ? totalCant : total;
   }
 
-  double totalPriceNeed(List<Product> products, bool necesidad) {
+  double totalPriceNeed(List<Product> products, bool? necesidad) {
     double total = 0;
     for (Product item in products) {
       if (item.necesidad == necesidad) {
@@ -215,17 +216,21 @@ class _ProductListScreen extends State<ProductListScreen> {
                         backgroundColor: Colors.grey.shade300,
                         color: _totalColor(cart),
                       ),
-                      Text(
-                        "${(cart.budgetPercentage * 100).toInt()}%",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(color: Colors.black, offset: Offset(1, 1)),
-                          ],
-                        ),
-                      ),
+                      showTextGraph
+                          ? Text(
+                              "${(cart.budgetPercentage * 100).toInt()}%",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                      color: Colors.black,
+                                      offset: Offset(1, 1)),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ],
                   ),
                 ),
@@ -250,17 +255,21 @@ class _ProductListScreen extends State<ProductListScreen> {
                                 ? Colors.orange
                                 : Colors.teal,
                       ),
-                      Text(
-                        "${(cart.productsOverBudgetPercentage * 100).toInt()}%",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(color: Colors.black, offset: Offset(1, 1)),
-                          ],
-                        ),
-                      ),
+                      showTextGraph
+                          ? Text(
+                              "${(cart.productsOverBudgetPercentage * 100).toInt()}%",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                      color: Colors.black,
+                                      offset: Offset(1, 1)),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ],
                   ),
                 ),
@@ -292,8 +301,9 @@ class _ProductListScreen extends State<ProductListScreen> {
                                     color: Colors.black, offset: Offset(1, 1)),
                               ],
                             ),
-                            title:
-                                "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})",
+                            title: showTextGraph
+                                ? "${cat.nombre}\n(${CantSelected ? totalPriceCategory(products, cat.nombre).toString() : "\$${totalPriceCategory(products, cat.nombre).toStringAsFixed(2)}"})"
+                                : "",
                           ),
                         ],
                       if (GraphSelected == 1) ...[
@@ -307,8 +317,23 @@ class _ProductListScreen extends State<ProductListScreen> {
                               Shadow(color: Colors.black, offset: Offset(1, 1)),
                             ],
                           ),
-                          title:
-                              "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})",
+                          title: showTextGraph
+                              ? "Necesito\n(${CantSelected ? totalPriceNeed(products, true).toString() : "\$${totalPriceNeed(products, true).toStringAsFixed(2)}"})"
+                              : "",
+                        ),
+                        PieChartSectionData(
+                          value: totalPriceNeed(products, null),
+                          color: Colors.grey,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(color: Colors.black, offset: Offset(1, 1)),
+                            ],
+                          ),
+                          title: showTextGraph
+                              ? "Sin Dato\n(${CantSelected ? totalPriceNeed(products, null).toString() : "\$${totalPriceNeed(products, null).toStringAsFixed(2)}"})"
+                              : "",
                         ),
                         PieChartSectionData(
                           value: totalPriceNeed(products, false),
@@ -320,8 +345,9 @@ class _ProductListScreen extends State<ProductListScreen> {
                               Shadow(color: Colors.black, offset: Offset(1, 1)),
                             ],
                           ),
-                          title:
-                              "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})",
+                          title: showTextGraph
+                              ? "Quiero\n(${CantSelected ? totalPriceNeed(products, false).toString() : "\$${totalPriceNeed(products, false).toStringAsFixed(2)}"})"
+                              : "",
                         ),
                       ]
                     ],
@@ -350,19 +376,23 @@ class _ProductListScreen extends State<ProductListScreen> {
                         ),
                         IconButton(
                           padding: const EdgeInsets.only(bottom: 20),
-                          icon: const Icon(Icons.category),
+                          icon: GraphSelected == 0
+                              ? const Icon(Icons.category)
+                              : const Icon(Icons.back_hand),
                           onPressed: () {
                             setState(() {
-                              GraphSelected = 0;
+                              GraphSelected = GraphSelected == 0 ? 1 : 0;
                             });
                           },
                         ),
                         IconButton(
                           padding: const EdgeInsets.only(bottom: 20),
-                          icon: const Icon(Icons.back_hand),
+                          icon: showTextGraph
+                              ? const Icon(Icons.text_increase)
+                              : const Icon(Icons.text_decrease),
                           onPressed: () {
                             setState(() {
-                              GraphSelected = 1;
+                              showTextGraph = !showTextGraph;
                             });
                           },
                         ),
@@ -375,8 +405,7 @@ class _ProductListScreen extends State<ProductListScreen> {
     ]);
   }
 
-  Widget buildListItem(BuildContext context, CartProvider cart, int index) {
-    Product item = cart.products[index];
+  Widget buildListItem(BuildContext context, CartProvider cart, Product item) {
     double unitTotal = item.precio * item.cantidad;
     final color = _productItemColor(cart, item);
 
@@ -388,13 +417,14 @@ class _ProductListScreen extends State<ProductListScreen> {
         child: Icon(item.categoria.iconData),
       ),
       onTap: () {
+        final realIndex = cart.products.indexOf(item);
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (_) => ProductFormScreen(
                     item: item, settings: widget.settings))).then((newItem) {
           if (newItem != null) {
-            cart.updateProduct(index, newItem);
+            cart.updateProduct(realIndex, newItem);
           }
         });
       },
@@ -413,7 +443,8 @@ class _ProductListScreen extends State<ProductListScreen> {
         ],
       ),
       onLongPress: () {
-        cart.removeProductAt(index);
+        final realIndex = cart.products.indexOf(item);
+        cart.removeProductAt(realIndex);
       },
     );
   }
@@ -434,7 +465,7 @@ class _ProductListScreen extends State<ProductListScreen> {
             onPressed: products.isNotEmpty
                 ? () {
                     cart.addToHistory(Shop(
-                        1, Market(1, "Dia"), DateTime.now(), products, total,
+                        1, Market(1, "Shop"), DateTime.now(), products, total,
                         budget: cart.budget,
                         productBudget: cart.productBudget));
                   }
@@ -480,7 +511,8 @@ class _ProductListScreen extends State<ProductListScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       restorationId: 'sampleItemListView',
                       itemCount: products.length,
-                      itemBuilder: (ctx, i) => buildListItem(ctx, cart, i),
+                      itemBuilder: (ctx, i) =>
+                          buildListItem(ctx, cart, products[products.length - 1 - i]),
                       separatorBuilder: (BuildContext context, int index) =>
                           const Divider(),
                     ),

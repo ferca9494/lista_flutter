@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 Color priceColor = const Color.fromARGB(255, 2, 207, 156);
 
-Color needColor = const Color.fromARGB(255, 185, 44, 44);
-Color wantColor = const Color.fromARGB(255, 76, 175, 150);
-
+Color wantColor = const Color.fromARGB(255, 185, 44, 44);
+Color needColor = const Color.fromARGB(255, 76, 175, 150);
 
 inputDeco(name, hint) => InputDecoration(
       hintText: hint,
