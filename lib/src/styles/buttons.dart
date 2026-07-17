@@ -10,7 +10,8 @@ ButtonStyle btn({Color color = Colors.blue, bool selected = false}) =>
       backgroundColor: WidgetStateProperty.all<Color>(color),
       side: selected
           ? WidgetStateProperty.all<BorderSide>(
-              const BorderSide(color: Colors.black, width: 2),
+              const BorderSide(
+                  color: Color.fromARGB(255, 255, 255, 255), width: 2),
             )
           : null,
     );

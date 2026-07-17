@@ -34,7 +34,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
 
   int id_item = 0;
   int id_categoria = 0;
-  bool necesidad = false;
+  bool? necesidad = null;
   bool showCategorias = false;
 
   List<Map<String, dynamic>> _productsCatalog = [];
@@ -124,7 +124,7 @@ class _ProductFormScreen extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Item'),
+        title: const Text('Nuevo Producto'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -290,7 +290,8 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                        style: btn(color: needColor, selected: necesidad),
+                        style:
+                            btn(color: needColor, selected: necesidad == true),
                         onPressed: () {
                           setState(() {
                             necesidad = true;
@@ -298,7 +299,17 @@ class _ProductFormScreen extends State<ProductFormScreen> {
                         },
                         child: const Text("Necesito!")),
                     ElevatedButton(
-                        style: btn(color: wantColor, selected: !necesidad),
+                        style: btn(
+                            color: Colors.grey, selected: necesidad == null),
+                        onPressed: () {
+                          setState(() {
+                            necesidad = null;
+                          });
+                        },
+                        child: const Text("-")),
+                    ElevatedButton(
+                        style:
+                            btn(color: wantColor, selected: necesidad == false),
                         onPressed: () {
                           setState(() {
                             necesidad = false;
@@ -311,12 +322,11 @@ class _ProductFormScreen extends State<ProductFormScreen> {
             )),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: save,
-        tooltip: 'Agregar item',
-        backgroundColor:
-            precioController.text.isEmpty ? Colors.grey : Colors.greenAccent,
-        child: const Icon(Icons.check),
-      ),
+          onPressed: save,
+          tooltip: 'Agregar producto',
+          backgroundColor:
+              precioController.text.isEmpty ? Colors.grey : Colors.greenAccent,
+          child: const Icon(Icons.check)),
     );
   }
 }

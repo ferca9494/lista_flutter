@@ -26,4 +26,8 @@ final List<Categoryy> categorias = [
       Icons.bakery_dining),
   Categoryy(11, "Otros", const Color.fromARGB(255, 120, 120, 120),
       Icons.category),
+  Categoryy(12, "Bebés", const Color.fromARGB(255, 255, 183, 197),
+      Icons.baby_changing_station),
+  Categoryy(13, "Salud Sexual", const Color.fromARGB(255, 244, 67, 54),
+      Icons.favorite),
 ];
